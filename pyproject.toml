@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "generic_schema"
+authors = [
+    {name = "End", email = "genericschema@3nd.io"},
+]
+description="Generic Schema is a configuration validator library and program."
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+    'pytest',
+]
+

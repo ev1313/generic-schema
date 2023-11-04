@@ -1,0 +1,13 @@
+{
+	"x": 1,
+	"date": "1.9.2020",
+	"switch": true,
+	"switch_off": false,
+	"floatvalue": 1.9,
+	"nested": {
+		"a": 1,
+		"b": 2
+	},
+	"file": "/foo/bar/baz.txt",
+	"optional": null
+}

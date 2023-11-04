@@ -1,0 +1,18 @@
+x = {_type = "int16", min = 1, max = 42}
+#date = "date"
+switch = "bool"
+switch_off = "bool"
+floatvalue = {_type = "double", min = 1.5, max = 2.0}
+floatvalue_optional = {_type = "double", min = 1.5, max = 2.0, default = 1.75}
+#file = {"_type" = "FILE", "chmod"= 777}
+optional = {_type = "bool", default = false}
+optional2 = {_type = "bool", default = true}
+optional3 = {_type = "bool", optional = true}
+
+array_int = {_type = "array", subtype = {_type = "int16", min = 1, max = 42}, minlen = 1, maxlen = 10}
+
+[nested]
+a = "uint8"
+b = "uint8"
+type = {_type = "str"}
+type2 = "str"
