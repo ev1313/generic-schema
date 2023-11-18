@@ -2,7 +2,8 @@ import json
 import tomllib
 import argparse
 
-from validators import parse_validator, Validator
+from validators import Validator
+from generic_schema.parse_validator import parse_validator
 
 import pdb
 

@@ -1,6 +1,7 @@
 from typing import Any, List, Dict, Optional
 import os, re
 
+
 class Validator():
     def __init__(self, name: str):
         self.name = name
@@ -250,65 +251,3 @@ class ArrayValidator(Validator):
         return value
 
 
-def parse_validator(name: str, check: Any) -> Validator:
-    if isinstance(check, str):
-        typename = check
-    elif isinstance(check, dict):
-        typename = check["_type"]
-    else:
-        raise TypeError(f"Invalid/Unknown check type {check}")
-
-    if typename in ["float", "float32"]:
-        return FloatValidator(name)
-    elif typename in ["double", "float64"]:
-        return DoubleValidator(name)
-    elif typename in ["str", "string"]:
-        return StringValidator(name)
-    elif typename in ["int8", "char"]:
-        return Int8Validator(name)
-    elif typename in ["int16", "short"]:
-        return Int16Validator(name)
-    elif typename in ["int32", "int", "long"]:
-        return Int32Validator(name)
-    elif typename in ["int64", "long long"]:
-        return Int64Validator(name)
-    elif typename in ["uint8", "unsigned char", "byte"]:
-        return UInt8Validator(name)
-    elif typename in ["uint16", "unsigned short"]:
-        return UInt16Validator(name)
-    elif typename in ["uint32", "unsigned int", "unsigned long"]:
-        return UInt32Validator(name)
-    elif typename in ["uint64", "unsigned long long"]:
-        return UInt64Validator(name)
-    elif typename in ["bool", "boolean"]:
-        return BooleanValidator(name)
-    elif typename in ["email"]:
-        return EMailValidator(name)
-    elif typename in ["regex"]:
-        return RegExValidator(name)
-    elif typename in ["array", "arr"]:
-        return ArrayValidator(name=name, subtype=parse_validator(name=f"{name}_arrayitem", check=check["subtype"]), subtype_check=check["subtype"] if isinstance(check["subtype"], dict) else {})
-    else:
-        raise TypeError(f"Invalid/Unknown typename {typename} for field {name}")
-
-
-def validate_config(config: Dict[str, Any], schema: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Validates a configuration against a schema and returns the configuration.
-    :param config: Dictionary containing the configuration
-    :param schema: Dictionary containing the schema
-    :return:
-    """
-    ret = {}
-    for key, check in schema.items():
-        if key not in config.keys():
-            raise ValueError(f"Missing key {key} in config file")
-
-        if isinstance(config[key], dict):
-            ret[key] = validate_config(config[key], check)
-            continue
-
-        validator = parse_validator(name=key, check=check)
-        ret[key] = validator.validate(config[key], check)
-
-    return ret

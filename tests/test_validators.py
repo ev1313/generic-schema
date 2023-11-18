@@ -1,6 +1,10 @@
+import tempfile
+import os
+
+from generic_schema.extra_validators import VersionValidator
 from generic_schema.validators import NumberValidator, FloatValidator, DoubleValidator, Int8Validator, Int16Validator, \
     Int32Validator, Int64Validator, UInt8Validator, UInt16Validator, UInt32Validator, UInt64Validator, StringValidator, \
-    BooleanValidator, ArrayValidator, RegExValidator, EMailValidator, parse_validator
+    BooleanValidator, ArrayValidator, RegExValidator, EMailValidator, FileValidator, DirectoryValidator
 import pytest
 
 
@@ -170,72 +174,37 @@ def test_email_validators():
         validator.validate("test", {})
 
 
-def test_parse_validator():
-    int8validator = parse_validator("int8", {"_type": "int8"})
-    assert(isinstance(int8validator, Int8Validator))
-    assert(int8validator.name == "int8")
+def test_version_validators():
+    validator = VersionValidator("test")
 
-    int16validator = parse_validator("int16", {"_type": "int16"})
-    assert(isinstance(int16validator, Int16Validator))
-    assert(int16validator.name == "int16")
+    assert(validator.validate("1.2.3", {}) == "1.2.3")
 
-    int32validator = parse_validator("int32", {"_type": "int32"})
-    assert(isinstance(int32validator, Int32Validator))
-    assert(int32validator.name == "int32")
 
-    int64validator = parse_validator("int64", {"_type": "int64"})
-    assert(isinstance(int64validator, Int64Validator))
-    assert(int64validator.name == "int64")
+def test_file_validator():
+    with tempfile.NamedTemporaryFile() as tmp:
+        schema = {"_type": "file"}
+        validator = FileValidator("test")
+        assert(validator.validate(tmp.name, schema) == tmp.name)
 
-    uint8validator = parse_validator("uint8", {"_type": "uint8"})
-    assert(isinstance(uint8validator, UInt8Validator))
-    assert(uint8validator.name == "uint8")
+    dir = tempfile.gettempdir()
+    with pytest.raises(ValueError):
+        validator.validate(os.path.join(dir, "foobar.txt"), schema)
+    with pytest.raises(ValueError):
+        validator.validate(dir, schema)
 
-    uint16validator = parse_validator("uint16", {"_type": "uint16"})
-    assert(isinstance(uint16validator, UInt16Validator))
-    assert(uint16validator.name == "uint16")
 
-    uint32validator = parse_validator("uint32", {"_type": "uint32"})
-    assert(isinstance(uint32validator, UInt32Validator))
-    assert(uint32validator.name == "uint32")
+def test_directory_validator():
+    dir = tempfile.gettempdir()
+    schema = {"_type": "directory"}
+    validator = DirectoryValidator("test")
+    assert(validator.validate(dir, schema) == dir)
 
-    uint64validator = parse_validator("uint64", {"_type": "uint64"})
-    assert(isinstance(uint64validator, UInt64Validator))
-    assert(uint64validator.name == "uint64")
+    with pytest.raises(ValueError):
+        validator.validate(os.path.join(dir, "foobar/"), schema)
 
-    floatvalidator = parse_validator("float", {"_type": "float"})
-    assert(isinstance(floatvalidator, FloatValidator))
-    assert(floatvalidator.name == "float")
-
-    doublevalidator = parse_validator("double", {"_type": "double"})
-    assert(isinstance(doublevalidator, DoubleValidator))
-    assert(doublevalidator.name == "double")
-
-    stringvalidator = parse_validator("string", {"_type": "string"})
-    assert(isinstance(stringvalidator, StringValidator))
-    assert(stringvalidator.name == "string")
-
-    booleanvalidator = parse_validator("boolean", {"_type": "boolean"})
-    assert(isinstance(booleanvalidator, BooleanValidator))
-    assert(booleanvalidator.name == "boolean")
-
-    arrayvalidator = parse_validator("array", {"_type": "array", "subtype": "int8"})
-    assert(isinstance(arrayvalidator, ArrayValidator))
-    assert(arrayvalidator.name == "array")
-
-    regexvalidator = parse_validator("regex", {"_type": "regex"})
-    assert(isinstance(regexvalidator, RegExValidator))
-    assert(regexvalidator.name == "regex")
-
-    emailvalidator = parse_validator("email", {"_type": "email"})
-    assert(isinstance(emailvalidator, EMailValidator))
-    assert(emailvalidator.name == "email")
-
-    with pytest.raises(TypeError):
-        parse_validator("invalid", {"_type": "invalid"})
-
-    with pytest.raises(TypeError):
-        parse_validator("invalid", [])
+    with tempfile.NamedTemporaryFile() as tmp:
+        with pytest.raises(ValueError):
+            validator.validate(tmp.name, schema)
 
 
 def test_default_key_validator():
@@ -248,7 +217,3 @@ def test_default_key_validator():
     with pytest.raises(ValueError):
         validator.validate(None, schema)
 
-
-def test_validate_config():
-    schema = {"test1": {"type": "int8", "min": 0, "max": 10},
-              "test2": {"type"}}
