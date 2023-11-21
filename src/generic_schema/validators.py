@@ -246,6 +246,7 @@ class ArrayValidator(Validator):
 
         ret = []
         for v in value:
+            # the array gets the subtype_check always from parse_validator
             ret.append(self.subtype.validate(v, self.subtype_check))
 
         return value
