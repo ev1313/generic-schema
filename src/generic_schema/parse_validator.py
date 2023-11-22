@@ -62,6 +62,17 @@ def parse_validator(name: str, check: Any) -> Validator:
         raise TypeError(f"Invalid/Unknown typename {typename} for field {name}")
 
 
+def validate_type(value: Any, check: Any) -> Any:
+    """
+    Validates a single value against a check.
+    :param value:
+    :param check: Dictionary item loaded from the toml file, may be dictionary or string
+    :return:
+    """
+    validator = parse_validator(name="value", check=check)
+    return validator.validate(value=value, check=check)
+
+
 def validate_config(config: Dict[str, Any], schema: Dict[str, Any]) -> Dict[str, Any]:
     """
     Validates a configuration against a schema and returns the configuration.
@@ -82,9 +93,29 @@ def validate_config(config: Dict[str, Any], schema: Dict[str, Any]) -> Dict[str,
                 raise ValueError(f"Error in subfield of {key}: {e}") from e
 
         try:
-            validator = parse_validator(name=key, check=check)
-            ret[key] = validator.validate(config[key], check)
+            ret[key] = validate_type(value=config[key], check=check)
         except ValueError as e:
             raise ValueError(f"Error in field {key}: {e}") from e
 
     return ret
+
+
+def validate_config_key(key: str, value: Any, schema: Dict[str, Any]) -> Any:
+    """
+    Validates a single key against a schema and returns the value.
+
+    :param key: Key to validate, may be in format "key.subkey.subsubkey"
+    :param value: Value to validate
+    :param schema: Dictionary containing the schema
+    :return:
+    """
+
+    # first get the schema for the key
+    check = schema
+    for key_part in key.split("."):
+        if key_part not in check.keys():
+            raise ValueError(f"Missing key {key} in schema")
+        check = check[key_part]
+
+    return validate_type(value=value, check=check)
+

@@ -1,7 +1,7 @@
 import pytest
 
 from generic_schema.extra_validators import VersionValidator, URIValidator
-from generic_schema.parse_validator import parse_validator, validate_config
+from generic_schema.parse_validator import parse_validator, validate_config, validate_type, validate_config_key
 from generic_schema.validators import Int8Validator, Int16Validator, Int32Validator, Int64Validator, UInt8Validator, \
     UInt16Validator, UInt32Validator, UInt64Validator, FloatValidator, DoubleValidator, StringValidator, \
     BooleanValidator, ArrayValidator, RegExValidator, EMailValidator, FileValidator, DirectoryValidator
@@ -91,6 +91,13 @@ def test_parse_validator():
         parse_validator("invalid", [])
 
 
+def test_validate_type():
+    schema = {"_type": "int8", "min": 0, "max": 10}
+    config = 5
+    ret = validate_type(config, schema)
+    assert(ret == config)
+
+
 def test_validate_config():
     schema = {"test1": {"_type": "int8", "min": 0, "max": 10},
               "test2": {"_type": "string"}}
@@ -122,4 +129,22 @@ def test_validate_config():
     config = {"test2": "test", "test3": {"test4": 11}}
     with pytest.raises(ValueError):
         validate_config(config, schema)
+
+
+def test_validate_config_key():
+    schema = {"test1": {"_type": "int8", "min": 0, "max": 10},
+              "test2": {"_type": "string"}}
+
+    value = "test1"
+    ret = validate_config_key("test2", value, schema)
+    assert(ret == value)
+
+    schema = {"test1": {"_type": "int8", "min": 0, "max": 10},
+              "test2": {"_type": "string"},
+              "test3": {"test4": {"_type": "int8", "min": 0, "max": 10}}
+              }
+    key = "test3.test4"
+    value = 9
+    ret = validate_config_key(key, value, schema)
+    assert(ret == value)
 
