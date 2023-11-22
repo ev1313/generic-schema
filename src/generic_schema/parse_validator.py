@@ -10,7 +10,7 @@ def parse_validator(name: str, check: Any) -> Validator:
     """
     returns a validator instance for the given check
     :param name: name of the field
-    :param check: check dictionary to parse (_type field determines instance type)
+    :param check: check dictionary to parse (_type field determines instance type), may also be a type string
     :return:
     """
     if isinstance(check, str):

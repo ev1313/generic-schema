@@ -148,3 +148,9 @@ def test_validate_config_key():
     ret = validate_config_key(key, value, schema)
     assert(ret == value)
 
+    with pytest.raises(ValueError):
+        validate_config_key(key, 11, schema)
+
+    with pytest.raises(ValueError):
+        validate_config_key("test3.foo", 1, schema)
+
